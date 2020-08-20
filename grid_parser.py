@@ -11,16 +11,15 @@ def gausianBlur(image):
     return proc
 
 
-def invertAndDilate(image):
+def invertAndDilate(image, skip_dilate):
     proc = cv2.bitwise_not(image.copy(), image.copy())
-    kernel = np.array([[0., 1., 0.], [1., 1., 1.], [0., 1., 0.]], np.uint8)
-    proc = cv2.dilate(proc, kernel)
+    if not skip_dilate:
+        kernel = np.array([[0., 1., 0.], [1., 1., 1.], [0., 1., 0.]], np.uint8)
+        proc = cv2.dilate(proc, kernel)
     return proc
 
 
 def findCorners(image):
-    proc = gausianBlur(image)
-    proc = invertAndDilate(proc)
     contours, h = cv2.findContours(
         image.copy(), cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
     contours = sorted(contours, key=cv2.contourArea, reverse=True)
@@ -71,11 +70,8 @@ def gridToSquares(image):
 
 def preprocessImage(image, skip_dilate):
     proc = gausianBlur(image)
-    proc = invertAndDilate(proc) if not skip_dilate else proc
-    corners = findCorners(proc)
-    transformed = perspectiveTransform(corners, proc)
-
-    return transformed
+    proc = invertAndDilate(proc, skip_dilate)
+    return proc
 
 
 def getSquares(image):
@@ -90,19 +86,39 @@ def getSquares(image):
     return squares
 
 
-def cut_from_rect(img, rect):
-    return img[int(rect[0][1]):int(rect[1][1]), int(rect[0][0]):int(rect[1][0])]
-
-
 def getDigits(squares, image, size):
     digits = []
     img = preprocessImage(image.copy(), skip_dilate=True)
     for square in squares:
         digits.append(extract_digit(img, square, size))
+    return digits
+
+
+def showDigits(digits, colour=255):
+    """Shows list of 81 extracted digits in a grid format"""
+    rows = []
+    with_border = [cv2.copyMakeBorder(
+        img.copy(), 1, 1, 1, 1, cv2.BORDER_CONSTANT, None, colour) for img in digits]
+    for i in range(9):
+        row = np.concatenate(with_border[i * 9:((i + 1) * 9)], axis=1)
+        rows.append(row)
+    img = np.concatenate(rows)
+    return img
+
+
+def grid_parser(path):
+    image = cv2.imread(path, cv2.IMREAD_GRAYSCALE)
+    #cv2.imshow("normal", image)
+    processed = preprocessImage(image, False)
+    corners = findCorners(processed)
+    cropped = perspectiveTransform(corners, image)
+    squares = getSquares(cropped)
+    digits = getDigits(squares, cropped, 28)
+    finalImage = showDigits(digits)
+    cv2.imshow("final", finalImage)
+    cv2.waitKey(0)
+    cv2.destroyAllWindows()
 
 
 image = cv2.imread("sudoku.jpg", cv2.IMREAD_GRAYSCALE)
-cv2.imshow("normal", image)
-cv2.imshow("image", preprocessImage(image))
-cv2.waitKey(0)
-cv2.destroyAllWindows()
+grid_parser("sudoku.jpg")
