@@ -1,5 +1,7 @@
 import cv2
+import matplotlib.pyplot as plt
 import numpy as np
+import sys
 
 image  = cv2.imread("sudoku.jpg")
 cv2.imshow("Image", image)
@@ -13,7 +15,7 @@ cv2.imshow("blur", blur)
 thresh = cv2.adaptiveThreshold(blur, 255, 1, 1, 11, 2)
 cv2.imshow("thresh", thresh)
 
-_, contours, _ = cv2.findContours(thresh, cv2.RETR_TREE, cv2.CHAIN_APPROX_SIMPLE)
+contours, _ = cv2.findContours(thresh, cv2.RETR_TREE, cv2.CHAIN_APPROX_SIMPLE)
 
 max_area = 0
 c = 0
@@ -41,7 +43,7 @@ cv2.imshow("blur1", blur)
 thresh = cv2.adaptiveThreshold(blur, 255, 1, 1, 11, 2)
 cv2.imshow("thresh1", thresh)
 
-_, contours, _ = cv2.findContours(thresh, cv2.RETR_TREE, cv2.CHAIN_APPROX_SIMPLE)
+contours, _ = cv2.findContours(thresh, cv2.RETR_TREE, cv2.CHAIN_APPROX_SIMPLE)
 
 c = 0
 for i in contours:
