@@ -2,6 +2,7 @@ import cv2
 import numpy as np
 import operator
 from utils import extract_digit, distance_between
+from mnist_model import splitImage
 
 
 def gausianBlur(image):
@@ -108,17 +109,10 @@ def showDigits(digits, colour=255):
 
 def grid_parser(path):
     image = cv2.imread(path, cv2.IMREAD_GRAYSCALE)
-    #cv2.imshow("normal", image)
     processed = preprocessImage(image, False)
     corners = findCorners(processed)
     cropped = perspectiveTransform(corners, image)
     squares = getSquares(cropped)
     digits = getDigits(squares, cropped, 28)
     finalImage = showDigits(digits)
-    cv2.imshow("final", finalImage)
-    cv2.waitKey(0)
-    cv2.destroyAllWindows()
-
-
-image = cv2.imread("sudoku.jpg", cv2.IMREAD_GRAYSCALE)
-grid_parser("sudoku.jpg")
+    return finalImage

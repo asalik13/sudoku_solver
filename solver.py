@@ -1,4 +1,4 @@
-def solveSudoku(self, board):
+def solveSudoku(board):
     """
     :type board: List[List[str]]
     :rtype: void Do not return anything, modify board in-place instead.
@@ -11,7 +11,7 @@ def solveSudoku(self, board):
     for i in range(0, 9):
         for j in range(0, 9):
             c = board[i][j]
-            if c != '.':
+            if c != 0:
                 num = int(c)
                 options[i].remove(num)
                 options[9 + j].remove(num)
@@ -19,13 +19,13 @@ def solveSudoku(self, board):
             else:
                 pos.append((i, j))
 
-    self.populateSingleOption(pos, options, board)
+    populateSingleOption(pos, options, board)
     answer = []
-    self.backtracking(pos, answer, options)
+    backtracking(pos, answer, options)
     for k in range(0, len(pos)):
         i, j = pos[k]
         num = answer[k]
-        board[i][j] = str(num)
+        board[i][j] = num
 
     return
 
@@ -45,7 +45,7 @@ def populateSingleOption(self, pos, options, board):
                 min_options = len(option)
             if len(option) == 1:
                 num = option.pop()
-                board[i][j] = str(num)
+                board[i][j] = num
                 pos.pop(k)  # This position is populated, remove
                 options[i].remove(num)
                 options[9 + j].remove(num)
